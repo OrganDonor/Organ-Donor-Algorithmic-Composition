@@ -1,5 +1,8 @@
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # make GF_2_12 for Organ Donor
+# becomes FiniteFieldMath.py for github
+# by Abraxas3d (Michelle Thompson)
+# abraxas@sand.net
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 
@@ -116,10 +119,10 @@ except:
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # pad out a chord vector to necessary places
-#Usage:
+# Usage:
 #
-#>>> list(pad([1,2,3], 7, ''))
-#[1, 2, 3, '', '', '', '']
+# >>> list(pad([1,2,3], 7, ''))
+# [1, 2, 3, '', '', '', '']
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 
@@ -128,6 +131,24 @@ def pad_infinite(iterable, padding=None):
 
 def pad(iterable, size, padding=None):
    return islice(pad_infinite(iterable, padding), size)
+
+
+
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# Get rid of duplicates in a list of lists
+# From Stack Overflow 
+# http://stackoverflow.com/questions/7961363/python-removing-duplicates-in-lists
+#
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+def make_unique(original_list):
+    unique_list = []
+    [unique_list.append(obj) for obj in original_list if obj not in unique_list]
+    return unique_list
+
+
+
+
 
 
 
@@ -201,7 +222,7 @@ def minweight(chord):
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # Rotate chord until minimum weight found, return transposition level.
 # Same level of operation as minweight(chord)
-# So the proposition is something like, ""Among all density-K bit vectors, 
+# So the proposition is something like, "Among all density-K bit vectors, 
 # that rotation with the highest density in # the low-order positions also 
 # has the following properties:..." and proceed to enumerate the normal-form 
 # properties.
@@ -241,7 +262,19 @@ def transposition_level(chord):
 
 	
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# express a chord in prime form
+# Express a Chord in Prime Form
+# prime form is a vector that contains the
+# intervals in the chord. 
+# Here is an example chord with prime form.
+# chord: [0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1]
+# prime form: [0, 2, 7]
+# there is always a 0 if there is a note.
+# a note has 0 interval with itself.
+# the 2 means an interval of 2 half steps 
+# exists in the chord. The 7 means an 
+# interval with 7 half steps exists in the
+# chord. The prime form is found after 
+# minimum weight is determined. 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 def primeform(chord):
 	pf = []
@@ -333,7 +366,7 @@ def invindvect(primeform):
 
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-#  Find Instances from Prime Form
+#  Find Chord Instances from Prime Form
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # An inverted lookup, whereby any prime form 
 # (can we call it a signature?) can be used 
@@ -342,12 +375,12 @@ def invindvect(primeform):
 # a prime form gives you all the pc vectors with that form.
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# express a chord in prime form
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 def findchords(primeform):
 	chord = [0,0,0,0,0,0,0,0,0,0,0,0]
+	instances = []
 	for index, number in enumerate(primeform): 
-		#index is the index, number is the value 0 or 1 at each index
+		# index is the index of (primeform), number is the existence of
+		# value 0 or 1 at each index
 		#print "at index",index,"there is value",number
 		chord[number] = 1;
 	print "chord we end up with is", chord
@@ -356,8 +389,13 @@ def findchords(primeform):
 	print r #the initial one
 	for i in range (0,11): #tried very hard to come up with a clever way to limit the number correctly
 		r.rotate(1)
-		print r #all the rest
-
+		instances.append(list(r)) #take the rotated chord, turn into a list (from deque), append to instances.
+		#print "\n", instances
+	# at this point we have a list of chords. 
+	# We need to eliminate duplicates.
+	# both deques and lists are unhashable, so set() didn't work
+	
+	return make_unique(instances)
 
 
 
@@ -466,6 +504,7 @@ print "attempt to find all chords that make the prime form for 1\n",findchords(p
 
 print "attempt to find all chords that make the prime form for 4095\n",findchords(primeform(minweight(left_justify_chord(4095))))
 
+print "attempt to find all chords that make the prime form for off-on\n",findchords(primeform(minweight([0,1,0,1,0,1,0,1,0,1,0,1])))
 
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
