@@ -475,18 +475,6 @@ def common_tone(u, v):
 
 
 
-
-
-
-
-
-
-
-
-# pc inversion of a vector
-# Oh, and transposition, where transpose(x, t) takes vector x and music-transposes it by t, mod 12.
-# function invert(x) takes each x_i and sends it to x_{12-i%12}.
-
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # transpose(u, t)
 # take a signature and music-transposes 
@@ -552,8 +540,6 @@ def pitches_to_signature(v):
 
 
 
-
-	
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # signature_complement(u)
@@ -650,7 +636,6 @@ print "attempt to find all chords that make the prime form for off-on\n",findcho
 
 print "attempt to find transposition level for [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0]:", transposition_level([0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0])
 
-
 print "testing common_tone (number of pitch classes in common between two chords)", common_tone(F.ShowCoefficients(1074)[1:13], F.ShowCoefficients(3333)[1:13])
 
 print "testing signature_to_pitches(3333). Signature for (3333) is", F.ShowCoefficients(3333)[1:13], "and the list of pitches for that is ", signature_to_pitches(F.ShowCoefficients(3333)[1:13])
@@ -662,8 +647,6 @@ print "testing def signature_complement([0,0,0,0,0,0,1,1,1,1,1,1])", signature_c
 
 print "testing transpose([0,0,0,0,0,0,1,1,1,1,1,1], 2)", transpose([0,0,0,0,0,0,1,1,1,1,1,1], 2)
 print "testing invert([0,0,0,0,0,0,1,1,1,1,1,1])", invert([0,0,0,0,0,0,1,1,1,1,1,1])
-
-
 
 
 
