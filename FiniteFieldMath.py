@@ -237,27 +237,31 @@ def minweight(chord):
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 def transposition_level(chord):
 	l = len(chord) #length of the chord
+	#print "length of the chord is", l
 	our_index = 0 #if nothing needs to be done, the transposition level is 0
 	startweight = math.factorial(l) #initial weight of the vector is measured. 
 	#a large index is a larger weight, becuase we want left-packing.
-	print "startweight = ", startweight
-	print "the length of the chord is", l, "so we'll do", l,"rotations to find lowest weight"
+	#print "startweight = ", startweight
+	#print "the length of the chord is", l, "so we'll do", l,"rotations to find lowest weight"
 	d = collections.deque(chord) #the rotated chord. Rotate once each time and test.
 	e = collections.deque(chord) #the chord we modify to return as lowest weight rotation.
 	for i in range(0, l):
-		print "round #", i
-		print "the rotated chord is ", d
-		print "and its weight is", weigh(d)
+		#print "round #", i
+		#print "the rotated chord is ", d
+		#print "and its weight is", weigh(d)
 		if weigh(d) < startweight:
 			our_index = i
-			print "update our_index to",i
+			#print "update our_index to",i
 			startweight = weigh(d)
-			print "update our minimum weight so far to", startweight
+			#print "update our minimum weight so far to", startweight
 		d.rotate(1)
 	e.rotate(our_index)
-	print "e.rotate(",our_index,") is", e
+	#print "e.rotate(",our_index,") is", e
 	#the transposition level is "our_index". This is also important.
-	our_index = our_index % 12
+	#print "our_index before modification is", our_index
+	our_index = (12 - our_index) % 12
+	#print "our_index after modification is", our_index
+
 	return our_index #return the transposition level
 
 	
@@ -383,10 +387,10 @@ def findchords(primeform):
 		# value 0 or 1 at each index
 		#print "at index",index,"there is value",number
 		chord[number] = 1;
-	print "chord we end up with is", chord
+	#print "chord we end up with is", chord
 	r = collections.deque(chord)
-	print "possible combinations that corresponds to this prime form would be:"
-	print r #the initial one
+	#print "possible combinations that corresponds to this prime form would be:"
+	#print r #the initial one
 	for i in range (0,11): #tried very hard to come up with a clever way to limit the number correctly
 		r.rotate(1)
 		instances.append(list(r)) #take the rotated chord, turn into a list (from deque), append to instances.
@@ -394,6 +398,7 @@ def findchords(primeform):
 	# at this point we have a list of chords. 
 	# We need to eliminate duplicates.
 	# both deques and lists are unhashable, so set() didn't work
+	# However, make_unique from Stack Overflow discussion worked. 
 	
 	return make_unique(instances)
 
@@ -405,7 +410,6 @@ def findchords(primeform):
 # A search function whereby you can match or 
 # partially-match any of the vectors we have 
 # generated in this code
-# Filter out the duplicates of the previous search!
 # You can find the duplicates analytically, too. 
 # Since we also have (trivially, now) the 
 # transposition level of each pc vector along 
@@ -428,6 +432,144 @@ def findchords(primeform):
 
 
 
+
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# common_tone(u, v)
+# we need a function common_tone(u, v) 
+# where u and v are signatures, telling which 
+# pitch classes they have in common.
+# It returns a vector with 1's where they 
+# have common pitches.
+# this is the same as a union of signatures.
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+def common_tone(u, v):
+	chordu = []
+	chordv = []
+	common_notes = []
+	result = [0,0,0,0,0,0,0,0,0,0,0,0]
+	for index, number in enumerate(u): 
+		# index is the index of (u), number is the existence of
+		# value 0 or 1 at each index
+		#print "at index",index,"there is value",number
+		if number == 1:
+			chordu.append(index)
+	for index, number in enumerate(v): 
+		# index is the index of (v), number is the existence of
+		# value 0 or 1 at each index
+		#print "at index",index,"there is value",number
+		if number == 1:
+			chordv.append(index)
+	print "comparing", chordu, "with", chordv
+
+	common_notes = list(set(chordu).intersection(chordv))
+	print common_notes
+
+	for index, number in enumerate(common_notes): 
+		# index is the index of (primeform), number is the existence of
+		# value 0 or 1 at each index
+		#print "at index",index,"there is value",number
+		result[number] = 1;
+	
+	return result
+
+
+
+
+
+
+
+
+
+
+
+# pc inversion of a vector
+# Oh, and transposition, where transpose(x, t) takes vector x and music-transposes it by t, mod 12.
+# function invert(x) takes each x_i and sends it to x_{12-i%12}.
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# transpose(u, t)
+# take a signature and music-transposes 
+# it by t, mod 12.
+# transpose(u, t) sends each u_i -> u_{(i+t)%12}
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+def transpose(u, t):
+	chord_u = [0,0,0,0,0,0,0,0,0,0,0,0]
+	for index, number in enumerate(u): 
+		# index is the index of (primeform), number is the existence of
+		# value 0 or 1 at each index
+		#print "at index",index,"there is value",number
+		if number == 1:
+			chord_u[(index + t)%12] = 1;
+	return chord_u
+	
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# invert(u)
+# takes each x_i and sends it to x_{12-i%12}.
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+def invert(u):
+	chord_u = [0,0,0,0,0,0,0,0,0,0,0,0]
+	for index, number in enumerate(u): 
+		# index is the index of (u), number is the existence of
+		# value 0 or 1 at each index
+		#print "at index",index,"there is value",number
+		if number == 1:
+			chord_u[(12 - (index))%12] = 1;
+	return chord_u
+
+
+
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# signature_to_pitches()
+# take a signature and list the pitches
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+def signature_to_pitches(u):
+	pitches_u = []
+	for index, number in enumerate(u): 
+		# index is the index of (u), number is the existence of
+		# value 0 or 1 at each index
+		#print "at index",index,"there is value",number
+		if number == 1:
+			pitches_u.append(index)
+	return pitches_u
+
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# pitches_to_signature()
+# take a list of pitches and make a signature
+# !!!currently doesn't do any error checking.
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+def pitches_to_signature(v):
+	chord_v = [0,0,0,0,0,0,0,0,0,0,0,0]
+	for index, number in enumerate(v): 
+		# index is the index of (primeform), number is the existence of
+		# value 0 or 1 at each index
+		#print "at index",index,"there is value",number
+		chord_v[number] = 1;
+	return chord_v
+
+
+
+
+	
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# signature_complement(u)
+# complement of a signature
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+def signature_complement(u):
+	chord_u = [0,0,0,0,0,0,0,0,0,0,0,0]
+	for index, number in enumerate(u): 
+		# index is the index of (u), number is the existence of
+		# value 0 or 1 at each index
+		#print "at index",index,"there is value",number
+		if number == 1:
+			chord_u[index] = 0
+		if number == 0:
+			chord_u[index] = 1
+	return chord_u
 
 
 
@@ -506,6 +648,26 @@ print "attempt to find all chords that make the prime form for 4095\n",findchord
 
 print "attempt to find all chords that make the prime form for off-on\n",findchords(primeform(minweight([0,1,0,1,0,1,0,1,0,1,0,1])))
 
+print "attempt to find transposition level for [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0]:", transposition_level([0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0])
+
+
+print "testing common_tone (number of pitch classes in common between two chords)", common_tone(F.ShowCoefficients(1074)[1:13], F.ShowCoefficients(3333)[1:13])
+
+print "testing signature_to_pitches(3333). Signature for (3333) is", F.ShowCoefficients(3333)[1:13], "and the list of pitches for that is ", signature_to_pitches(F.ShowCoefficients(3333)[1:13])
+
+print "testing pitches_to_signature(3333). Pitches for (3333) is", signature_to_pitches(F.ShowCoefficients(3333)[1:13]), "and the list of pitches for that is ", pitches_to_signature(signature_to_pitches(F.ShowCoefficients(3333)[1:13]))
+
+
+print "testing def signature_complement([0,0,0,0,0,0,1,1,1,1,1,1])", signature_complement([0,0,0,0,0,0,1,1,1,1,1,1])
+
+print "testing transpose([0,0,0,0,0,0,1,1,1,1,1,1], 2)", transpose([0,0,0,0,0,0,1,1,1,1,1,1], 2)
+print "testing invert([0,0,0,0,0,0,1,1,1,1,1,1])", invert([0,0,0,0,0,0,1,1,1,1,1,1])
+
+
+
+
+
+
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # Create a lookup table for normal form 
@@ -539,6 +701,8 @@ interval_vector_lut = "/Users/w5nyv/Dropbox/Pipe_Organ/MIDI/interval_vector_lut.
 interval_vector_lut_fp = open(interval_vector_lut, 'w+')
 inversional_index_vector_lut = "/Users/w5nyv/Dropbox/Pipe_Organ/MIDI/inversional_index_vector_lut.txt"
 inversional_index_vector_lut_fp = open(inversional_index_vector_lut, 'w+')
+transposition_level_lut = "/Users/w5nyv/Dropbox/Pipe_Organ/MIDI/transposition_level_lut.txt"
+transposition_level_lut_fp = open(transposition_level_lut, 'w+')
 
 for i in range(1, (2**12)):
 	#lut_dict[F.ShowCoefficients(i)] = primeform(minweight(left_justify_chord(i)))
@@ -547,9 +711,12 @@ for i in range(1, (2**12)):
 	print >>inversional_index_vector_lut_fp, "prime form is", primeform(minweight(left_justify_chord(i)))
 	#print the normal form for this vector right after
 	#print the interval vector for this result right after
+	#print the inversional index vector right after
 	print >>normal_form_lut_fp, primeform(minweight(left_justify_chord(i)))
 	print >>interval_vector_lut_fp, "interval vector is",intvect(primeform(minweight(left_justify_chord(i)))),"\n"
 	print >>inversional_index_vector_lut_fp, "inversional index vector is", invindvect(primeform(minweight(left_justify_chord(i)))),"\n"
+	print >>transposition_level_lut_fp, F.ShowCoefficients(i)[1:13], transposition_level(F.ShowCoefficients(i)[1:13])
+
 
 #print lut_dict
 #can't use a list as a hash - but convert it into a binary number and then use that?
