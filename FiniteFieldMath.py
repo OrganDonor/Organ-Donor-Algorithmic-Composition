@@ -435,10 +435,13 @@ def findchords(primeform):
 
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# common_tone()
+# common_tone(u, v)
 # we need a function common_tone(u, v) 
-# where u and v are pc vectors, telling which 
-# pcs they have in common.
+# where u and v are signatures, telling which 
+# pitch classes they have in common.
+# It returns a vector with 1's where they 
+# have common pitches.
+# this is the same as a union of signatures.
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 def common_tone(u, v):
 	chordu = []
@@ -472,22 +475,87 @@ def common_tone(u, v):
 
 
 
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# transpose(u, t)
+# take a signature and music-transposes 
+# it by t, mod 12.
+# transpose(u, t) sends each u_i -> u_{(i+t)%12}
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+def transpose(u, t):
+	chord_u = [0,0,0,0,0,0,0,0,0,0,0,0]
+	for index, number in enumerate(u): 
+		# index is the index of (primeform), number is the existence of
+		# value 0 or 1 at each index
+		#print "at index",index,"there is value",number
+		if number == 1:
+			chord_u[(index + t)%12] = 1;
+	return chord_u
+	
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# invert(u)
+# takes each x_i and sends it to x_{12-i%12}.
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+def invert(u):
+	chord_u = [0,0,0,0,0,0,0,0,0,0,0,0]
+	for index, number in enumerate(u): 
+		# index is the index of (u), number is the existence of
+		# value 0 or 1 at each index
+		#print "at index",index,"there is value",number
+		if number == 1:
+			chord_u[(12 - (index))%12] = 1;
+	return chord_u
 
 
 
 
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# signature_to_pitches()
+# take a signature and list the pitches
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+def signature_to_pitches(u):
+	pitches_u = []
+	for index, number in enumerate(u): 
+		# index is the index of (u), number is the existence of
+		# value 0 or 1 at each index
+		#print "at index",index,"there is value",number
+		if number == 1:
+			pitches_u.append(index)
+	return pitches_u
+
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# pitches_to_signature()
+# take a list of pitches and make a signature
+# !!!currently doesn't do any error checking.
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+def pitches_to_signature(v):
+	chord_v = [0,0,0,0,0,0,0,0,0,0,0,0]
+	for index, number in enumerate(v): 
+		# index is the index of (primeform), number is the existence of
+		# value 0 or 1 at each index
+		#print "at index",index,"there is value",number
+		chord_v[number] = 1;
+	return chord_v
 
 
 
 
-# also union and complement
-# pc inversion of a vector
-# Oh, and transposition, where transpose(x, t) takes vector x and music-transposes it by t, mod 12.
-# function invert(x) takes each x_i and sends it to x_{12-i%12}.
-# So transpose(u, t) sends each u_i -> u_{(i+t)%12}
-
-
-
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# signature_complement(u)
+# complement of a signature
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+def signature_complement(u):
+	chord_u = [0,0,0,0,0,0,0,0,0,0,0,0]
+	for index, number in enumerate(u): 
+		# index is the index of (u), number is the existence of
+		# value 0 or 1 at each index
+		#print "at index",index,"there is value",number
+		if number == 1:
+			chord_u[index] = 0
+		if number == 0:
+			chord_u[index] = 1
+	return chord_u
 
 
 
@@ -568,8 +636,20 @@ print "attempt to find all chords that make the prime form for off-on\n",findcho
 
 print "attempt to find transposition level for [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0]:", transposition_level([0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0])
 
+print "testing common_tone (number of pitch classes in common between two chords)", common_tone(F.ShowCoefficients(1074)[1:13], F.ShowCoefficients(3333)[1:13])
 
-print "testing common_tone (number of pitch classes in common between two chords)", common_tone(F.ShowCoefficients(4095)[1:13], F.ShowCoefficients(4095)[1:13])
+print "testing signature_to_pitches(3333). Signature for (3333) is", F.ShowCoefficients(3333)[1:13], "and the list of pitches for that is ", signature_to_pitches(F.ShowCoefficients(3333)[1:13])
+
+print "testing pitches_to_signature(3333). Pitches for (3333) is", signature_to_pitches(F.ShowCoefficients(3333)[1:13]), "and the list of pitches for that is ", pitches_to_signature(signature_to_pitches(F.ShowCoefficients(3333)[1:13]))
+
+
+print "testing def signature_complement([0,0,0,0,0,0,1,1,1,1,1,1])", signature_complement([0,0,0,0,0,0,1,1,1,1,1,1])
+
+print "testing transpose([0,0,0,0,0,0,1,1,1,1,1,1], 2)", transpose([0,0,0,0,0,0,1,1,1,1,1,1], 2)
+print "testing invert([0,0,0,0,0,0,1,1,1,1,1,1])", invert([0,0,0,0,0,0,1,1,1,1,1,1])
+
+
+
 
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
