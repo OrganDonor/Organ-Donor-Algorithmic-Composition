@@ -154,12 +154,12 @@ def make_unique(original_list):
 
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# Left justify the chord
+# Left justify the signature
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-def left_justify_chord(element):
+def left_justify_signature(element):
 	for index, number in enumerate(F.ShowCoefficients(element)):
 		if number != 0: # or 'if number:'
-			#print "inside left_justify_chord(element): F.ShowCoefficients(",element,") is", F.ShowCoefficients(element)
+			#print "inside left_justify_signature(element): F.ShowCoefficients(",element,") is", F.ShowCoefficients(element)
 			#print "after slicing out the first",index,"elements, which are zeros, we get:", F.ShowCoefficients(element)[index:12]
 			#print "then we need to pad the end so that it is 12 zeros long. 
 			#list(pad(F.ShowCoefficients(element)[index::], 13, '0'))
@@ -168,11 +168,11 @@ def left_justify_chord(element):
 
 			
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# determine weight of chord
+# determine weight of signature
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-def weigh(chord):
+def weigh(signature):
 	w = 0
-	for index, number in enumerate(chord): #index is the index, number is the value 0 or 1 at each index
+	for index, number in enumerate(signature): #index is the index, number is the value 0 or 1 at each index
 		#print "the place in the chord is note#", index + 1,"and the value at that index is",number, "for weight of", number * (index + 1)
 		if number == 1:
 			w = w + (index + 1)*(index + 1) #index starts at zero, so put in an offset so that index 0 has a weight
@@ -180,7 +180,7 @@ def weigh(chord):
 	return w
 	
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# Rotate chord until minimum weight found, return chord
+# Rotate signature until minimum weight found, return signature
 # So the proposition is something like, ""Among all density-K bit vectors, 
 # that rotation with the highest density in # the low-order positions also 
 # has the following properties:..." and proceed to enumerate the normal-form 
@@ -194,15 +194,15 @@ def weigh(chord):
 #	print d
 #	>>> deque([3, 4, 5, 1, 2])
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-def minweight(chord):
-	l = len(chord) #length of the chord
+def minweight(signature):
+	l = len(signature) #length of the chord
 	our_index = 0 #if nothing needs to be done, the transposition level is 0
 	startweight = math.factorial(l) #initial weight of the vector is measured. 
 	#a large index is a larger weight, becuase we want left-packing.
 	#print "startweight = ", startweight
 	#print "the length of the chord is", l, "so we'll do", l,"rotations to find lowest weight"
-	d = collections.deque(chord) #the rotated chord. Rotate once each time and test.
-	e = collections.deque(chord) #the chord we modify to return as lowest weight rotation.
+	d = collections.deque(signature) #the rotated chord. Rotate once each time and test.
+	e = collections.deque(signature) #the chord we modify to return as lowest weight rotation.
 	for i in range(0, l):
 		#print "round #", i
 		#print "the rotated chord is ", d
@@ -235,16 +235,16 @@ def minweight(chord):
 #	print d
 #	>>> deque([3, 4, 5, 1, 2])
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-def transposition_level(chord):
-	l = len(chord) #length of the chord
+def transposition_level(signature):
+	l = len(signature) #length of the chord
 	#print "length of the chord is", l
 	our_index = 0 #if nothing needs to be done, the transposition level is 0
 	startweight = math.factorial(l) #initial weight of the vector is measured. 
 	#a large index is a larger weight, becuase we want left-packing.
 	#print "startweight = ", startweight
 	#print "the length of the chord is", l, "so we'll do", l,"rotations to find lowest weight"
-	d = collections.deque(chord) #the rotated chord. Rotate once each time and test.
-	e = collections.deque(chord) #the chord we modify to return as lowest weight rotation.
+	d = collections.deque(signature) #the rotated chord. Rotate once each time and test.
+	e = collections.deque(signature) #the chord we modify to return as lowest weight rotation.
 	for i in range(0, l):
 		#print "round #", i
 		#print "the rotated chord is ", d
@@ -266,10 +266,10 @@ def transposition_level(chord):
 
 	
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# Express a Chord in Prime Form
+# Express a signature in Prime Form
 # prime form is a vector that contains the
 # intervals in the chord. 
-# Here is an example chord with prime form.
+# Here is an example signature with prime form.
 # chord: [0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1]
 # prime form: [0, 2, 7]
 # there is always a 0 if there is a note.
@@ -280,9 +280,9 @@ def transposition_level(chord):
 # chord. The prime form is found after 
 # minimum weight is determined. 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-def primeform(chord):
+def primeform(signature):
 	pf = []
-	for index, number in enumerate(chord): 
+	for index, number in enumerate(signature): 
 		#index is the index, number is the value 0 or 1 at each index
 		if number == 1:
 			#print "there is a note at index", index 
@@ -307,19 +307,19 @@ def complement(note):
 		return note
 	
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# express a chord as an interval vector
+# express a signature as an interval vector
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	
-#It's a 6-long vector that gives the cardinality of each interval in the chord. An interval is the difference between two pitch-classes, mod 12. For reasons which I won't spell out now (but are pretty obvious), an interval larger than 6 is counted as its inversion -- that is, its complement, mod 12. (For example, 7, a perfect fifth, is counted as 5, a perfect fourth.)
+#It's a 6-long vector that gives the cardinality of each interval in the signature. An interval is the difference between two pitch-classes, mod 12. For reasons which I won't spell out now (but are pretty obvious), an interval larger than 6 is counted as its inversion -- that is, its complement, mod 12. (For example, 7, a perfect fifth, is counted as 5, a perfect fourth.)
 
-#	So, for the chord (in normal form) [0, 1, 3], we have
+#	So, for the signature (in normal form) [0, 1, 3], we have
 #	0 - 1 mod 12 = 11 -> 1.
 #	0 - 3 mod 12 = 9 -> 3.
 #	1 - 3 mod 12 = 10 -> 2.
 #	The interval vector would be
 #	[1, 1, 1, 0, 0, 0]
 
-#	For the chord [0, 2, 4]:
+#	For the signature (in normal form) [0, 2, 4]:
 #	0 - 2 mod 12 = 10 -> 2.
 #	0 - 4 mod 12 = 8 -> 4.
 #	2 - 4 mod 12 = 10 -> 2.
@@ -370,30 +370,29 @@ def invindvect(primeform):
 
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-#  Find Chord Instances from Prime Form
+#  Find signature Instances from Prime Form
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # An inverted lookup, whereby any prime form 
-# (can we call it a signature?) can be used 
 # to look up all the instances of that signature 
 # in the original list -- in other words, giving 
 # a prime form gives you all the pc vectors with that form.
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-def findchords(primeform):
-	chord = [0,0,0,0,0,0,0,0,0,0,0,0]
+def find_signatures(primeform):
+	signature = [0,0,0,0,0,0,0,0,0,0,0,0]
 	instances = []
 	for index, number in enumerate(primeform): 
 		# index is the index of (primeform), number is the existence of
 		# value 0 or 1 at each index
 		#print "at index",index,"there is value",number
-		chord[number] = 1;
+		signature[number] = 1;
 	#print "chord we end up with is", chord
-	r = collections.deque(chord)
+	r = collections.deque(signature)
 	#print "possible combinations that corresponds to this prime form would be:"
 	#print r #the initial one
 	for i in range (0,11): #tried very hard to come up with a clever way to limit the number correctly
 		r.rotate(1)
-		instances.append(list(r)) #take the rotated chord, turn into a list (from deque), append to instances.
+		instances.append(list(r)) #take the rotated signature, turn into a list (from deque), append to instances.
 		#print "\n", instances
 	# at this point we have a list of chords. 
 	# We need to eliminate duplicates.
@@ -444,8 +443,8 @@ def findchords(primeform):
 # this is the same as a union of signatures.
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 def common_tone(u, v):
-	chordu = []
-	chordv = []
+	signatureu = []
+	signaturev = []
 	common_notes = []
 	result = [0,0,0,0,0,0,0,0,0,0,0,0]
 	for index, number in enumerate(u): 
@@ -453,16 +452,16 @@ def common_tone(u, v):
 		# value 0 or 1 at each index
 		#print "at index",index,"there is value",number
 		if number == 1:
-			chordu.append(index)
+			signatureu.append(index)
 	for index, number in enumerate(v): 
 		# index is the index of (v), number is the existence of
 		# value 0 or 1 at each index
 		#print "at index",index,"there is value",number
 		if number == 1:
-			chordv.append(index)
-	print "comparing", chordu, "with", chordv
+			signaturev.append(index)
+	print "comparing", signatureu, "with", signaturev
 
-	common_notes = list(set(chordu).intersection(chordv))
+	common_notes = list(set(signatureu).intersection(signaturev))
 	print common_notes
 
 	for index, number in enumerate(common_notes): 
@@ -475,6 +474,18 @@ def common_tone(u, v):
 
 
 
+
+
+
+
+
+
+
+
+# pc inversion of a vector
+# Oh, and transposition, where transpose(x, t) takes vector x and music-transposes it by t, mod 12.
+# function invert(x) takes each x_i and sends it to x_{12-i%12}.
+
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # transpose(u, t)
 # take a signature and music-transposes 
@@ -482,28 +493,28 @@ def common_tone(u, v):
 # transpose(u, t) sends each u_i -> u_{(i+t)%12}
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 def transpose(u, t):
-	chord_u = [0,0,0,0,0,0,0,0,0,0,0,0]
+	signature_u = [0,0,0,0,0,0,0,0,0,0,0,0]
 	for index, number in enumerate(u): 
 		# index is the index of (primeform), number is the existence of
 		# value 0 or 1 at each index
 		#print "at index",index,"there is value",number
 		if number == 1:
-			chord_u[(index + t)%12] = 1;
-	return chord_u
+			signature_u[(index + t)%12] = 1;
+	return signature_u
 	
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # invert(u)
 # takes each x_i and sends it to x_{12-i%12}.
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 def invert(u):
-	chord_u = [0,0,0,0,0,0,0,0,0,0,0,0]
+	signature_u = [0,0,0,0,0,0,0,0,0,0,0,0]
 	for index, number in enumerate(u): 
 		# index is the index of (u), number is the existence of
 		# value 0 or 1 at each index
 		#print "at index",index,"there is value",number
 		if number == 1:
-			chord_u[(12 - (index))%12] = 1;
-	return chord_u
+			signature_u[(12 - (index))%12] = 1;
+	return signature_u
 
 
 
@@ -530,32 +541,34 @@ def signature_to_pitches(u):
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 def pitches_to_signature(v):
-	chord_v = [0,0,0,0,0,0,0,0,0,0,0,0]
+	signature_v = [0,0,0,0,0,0,0,0,0,0,0,0]
 	for index, number in enumerate(v): 
 		# index is the index of (primeform), number is the existence of
 		# value 0 or 1 at each index
 		#print "at index",index,"there is value",number
-		chord_v[number] = 1;
-	return chord_v
+		signature_v[number] = 1;
+	return signature_v
 
 
 
+
+	
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # signature_complement(u)
 # complement of a signature
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 def signature_complement(u):
-	chord_u = [0,0,0,0,0,0,0,0,0,0,0,0]
+	signature_u = [0,0,0,0,0,0,0,0,0,0,0,0]
 	for index, number in enumerate(u): 
 		# index is the index of (u), number is the existence of
 		# value 0 or 1 at each index
 		#print "at index",index,"there is value",number
 		if number == 1:
-			chord_u[index] = 0
+			signature_u[index] = 0
 		if number == 0:
-			chord_u[index] = 1
-	return chord_u
+			signature_u[index] = 1
+	return signature_u
 
 
 
@@ -609,34 +622,34 @@ for i in range(0, (2**12)):
 	#print "F.ShowCoefficients(",i,")", F.ShowCoefficients(i)
 	if F.ShowCoefficients(i).count(1) == 12:
 		print "F.ShowCoefficients(",i,")", F.ShowCoefficients(i)
-		print "number of notes in this chord is", F.ShowCoefficients(i).count(1)
+		print "number of notes in this signature is", F.ShowCoefficients(i).count(1)
 		number_of_chords = number_of_chords + 1
 	number_of_notes = 0
 	j = 0
-print "number of chords in this run is", number_of_chords
+print "number of signature in this run is", number_of_chords
 print "all done."
 
 print "Just printing F.ShowCoefficients(2222) is", F.ShowCoefficients(2222)[1:13]
 
-print "left_justify_chord(2222) is", left_justify_chord(2222)
-print "weigh this chord 2222:\n", weigh(left_justify_chord(2222))
-print "rotate this chord and find minimum weight 2222:\n", minweight(left_justify_chord(2222))
-print "attempt to find transpositional level:\n", transposition_level(left_justify_chord(2222))
+print "left_justify_signature(2222) is", left_justify_signature(2222)
+print "weigh this signature 2222:\n", weigh(left_justify_signature(2222))
+print "rotate this signature and find minimum weight 2222:\n", minweight(left_justify_signature(2222))
 #print "2222:", F.ShowCoefficients(2222)
-print "attempt to find prime form for 2222:\n", primeform(minweight(left_justify_chord(2222)))
-print "attempt to find interval vector for 2222\n", intvect(primeform(minweight(left_justify_chord(2222))))
-print "attempt to find inversional index vector for 2222\n", invindvect(primeform(minweight(left_justify_chord(2222))))
-print "attempt to find all chords that make the prime form for 2222\n",findchords(primeform(minweight(left_justify_chord(2222))))
+print "attempt to find prime form for 2222:\n", primeform(minweight(left_justify_signature(2222)))
+print "attempt to find interval vector for 2222\n", intvect(primeform(minweight(left_justify_signature(2222))))
+print "attempt to find inversional index vector for 2222\n", invindvect(primeform(minweight(left_justify_signature(2222))))
+print "attempt to find all signature that make the prime form for 2222\n",find_signatures(primeform(minweight(left_justify_signature(2222))))
 
-print "attempt to find all chords that make the prime form for 1\n",findchords(primeform(minweight(left_justify_chord(1))))
+print "attempt to find all signature that make the prime form for 1\n",find_signatures(primeform(minweight(left_justify_signature(1))))
 
-print "attempt to find all chords that make the prime form for 4095\n",findchords(primeform(minweight(left_justify_chord(4095))))
+print "attempt to find all signature that make the prime form for 4095\n",find_signatures(primeform(minweight(left_justify_signature(4095))))
 
-print "attempt to find all chords that make the prime form for off-on\n",findchords(primeform(minweight([0,1,0,1,0,1,0,1,0,1,0,1])))
+print "attempt to find all signature that make the prime form for off-on\n",find_signatures(primeform(minweight([0,1,0,1,0,1,0,1,0,1,0,1])))
 
 print "attempt to find transposition level for [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0]:", transposition_level([0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0])
 
-print "testing common_tone (number of pitch classes in common between two chords)", common_tone(F.ShowCoefficients(1074)[1:13], F.ShowCoefficients(3333)[1:13])
+
+print "testing common_tone (number of pitch classes in common between two signatures)", common_tone(F.ShowCoefficients(1074)[1:13], F.ShowCoefficients(3333)[1:13])
 
 print "testing signature_to_pitches(3333). Signature for (3333) is", F.ShowCoefficients(3333)[1:13], "and the list of pitches for that is ", signature_to_pitches(F.ShowCoefficients(3333)[1:13])
 
@@ -647,6 +660,8 @@ print "testing def signature_complement([0,0,0,0,0,0,1,1,1,1,1,1])", signature_c
 
 print "testing transpose([0,0,0,0,0,0,1,1,1,1,1,1], 2)", transpose([0,0,0,0,0,0,1,1,1,1,1,1], 2)
 print "testing invert([0,0,0,0,0,0,1,1,1,1,1,1])", invert([0,0,0,0,0,0,1,1,1,1,1,1])
+
+
 
 
 
@@ -688,16 +703,16 @@ transposition_level_lut = "/Users/w5nyv/Dropbox/Pipe_Organ/MIDI/transposition_le
 transposition_level_lut_fp = open(transposition_level_lut, 'w+')
 
 for i in range(1, (2**12)):
-	#lut_dict[F.ShowCoefficients(i)] = primeform(minweight(left_justify_chord(i)))
+	#lut_dict[F.ShowCoefficients(i)] = primeform(minweight(left_justify_signature(i)))
 	print >>normal_form_lut_fp, F.ShowCoefficients(i)[1:13]
-	print >>interval_vector_lut_fp, "prime form is", primeform(minweight(left_justify_chord(i)))
-	print >>inversional_index_vector_lut_fp, "prime form is", primeform(minweight(left_justify_chord(i)))
+	print >>interval_vector_lut_fp, "prime form is", primeform(minweight(left_justify_signature(i)))
+	print >>inversional_index_vector_lut_fp, "prime form is", primeform(minweight(left_justify_signature(i)))
 	#print the normal form for this vector right after
 	#print the interval vector for this result right after
 	#print the inversional index vector right after
-	print >>normal_form_lut_fp, primeform(minweight(left_justify_chord(i)))
-	print >>interval_vector_lut_fp, "interval vector is",intvect(primeform(minweight(left_justify_chord(i)))),"\n"
-	print >>inversional_index_vector_lut_fp, "inversional index vector is", invindvect(primeform(minweight(left_justify_chord(i)))),"\n"
+	print >>normal_form_lut_fp, primeform(minweight(left_justify_signature(i)))
+	print >>interval_vector_lut_fp, "interval vector is",intvect(primeform(minweight(left_justify_signature(i)))),"\n"
+	print >>inversional_index_vector_lut_fp, "inversional index vector is", invindvect(primeform(minweight(left_justify_signature(i)))),"\n"
 	print >>transposition_level_lut_fp, F.ShowCoefficients(i)[1:13], transposition_level(F.ShowCoefficients(i)[1:13])
 
 
