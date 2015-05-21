@@ -112,10 +112,9 @@ except:
 # Custom functions
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-#To answer the question first: you need to know the cardinality of the chord. That is, how many notes.
-#Given that, you can determine which rotation of the chord (1) has the smallest interval between the 
-#first and last elements, and (2) when the first criterion is met by more than one rotation, then which 
-#rotation has the smallest interval at the bottom.
+
+
+
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # pad out a chord vector to necessary places
@@ -148,11 +147,6 @@ def make_unique(original_list):
 
 
 
-
-
-
-
-
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # Left justify the signature
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -167,6 +161,8 @@ def left_justify_signature(element):
 			return list(pad(F.ShowCoefficients(element)[index::], 12, 0))
 
 			
+			
+			
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # determine weight of signature
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -179,8 +175,13 @@ def weigh(signature):
 	#print "weight is", w
 	return w
 	
+	
+	
+	
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# Rotate signature until minimum weight found, return signature
+# minweight(signature)
+# Rotate signature until minimum weight found, 
+# then return that signature.
 # So the proposition is something like, ""Among all density-K bit vectors, 
 # that rotation with the highest density in # the low-order positions also 
 # has the following properties:..." and proceed to enumerate the normal-form 
@@ -219,13 +220,13 @@ def minweight(signature):
 	return e #return the rotation that results in the lowest weight
 	
 	
+	
+	
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# Rotate chord until minimum weight found, return transposition level.
+# transposition_level(signature)
+# Rotate chord until minimum weight found, 
+# then return transposition level.
 # Same level of operation as minweight(chord)
-# So the proposition is something like, "Among all density-K bit vectors, 
-# that rotation with the highest density in # the low-order positions also 
-# has the following properties:..." and proceed to enumerate the normal-form 
-# properties.
 #
 #	import collections
 #
@@ -266,6 +267,7 @@ def transposition_level(signature):
 
 	
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# primeform(signature)
 # Express a signature in Prime Form
 # prime form is a vector that contains the
 # intervals in the chord. 
@@ -288,26 +290,33 @@ def primeform(signature):
 			#print "there is a note at index", index 
 			pf.append(index)
 	return pf
-	
+
+
+
+
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# find complement of a note
+# complement(pitch)
+# find complement of a pitch
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-def complement(note):
-	if note == 11:
+def complement(pitch):
+	if pitch == 11:
 		return 1
-	if note == 10:
+	if pitch == 10:
 		return 2
-	if note == 9:
+	if pitch == 9:
 		return 3
-	if note == 8:
+	if pitch == 8:
 		return 4
-	if note == 7:
+	if pitch == 7:
 		return 5
 	else:
-		return note
+		return pitch
+	
+	
 	
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# express a signature as an interval vector
+# intvect(primeform)
+# express a primeform as an interval vector
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 	
 #It's a 6-long vector that gives the cardinality of each interval in the signature. An interval is the difference between two pitch-classes, mod 12. For reasons which I won't spell out now (but are pretty obvious), an interval larger than 6 is counted as its inversion -- that is, its complement, mod 12. (For example, 7, a perfect fifth, is counted as 5, a perfect fourth.)
@@ -346,7 +355,8 @@ def intvect(primeform):
 	
 	
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# express a chord as an inversional index vector
+# invindvect(primeform)
+# express a primeform as an inversional index vector
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
 def invindvect(primeform):
@@ -370,13 +380,13 @@ def invindvect(primeform):
 
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-#  Find signature Instances from Prime Form
+# find_signatures(primeform)
+# Find signature Instances from Prime Form
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # An inverted lookup, whereby any prime form 
 # to look up all the instances of that signature 
 # in the original list -- in other words, giving 
 # a prime form gives you all the pc vectors with that form.
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 def find_signatures(primeform):
 	signature = [0,0,0,0,0,0,0,0,0,0,0,0]
@@ -403,21 +413,115 @@ def find_signatures(primeform):
 
 
 
+
+
+
+
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# Augury
+# augury(primeform, signature)
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # A search function whereby you can match or 
 # partially-match any of the vectors we have 
-# generated in this code
+# generated in this code.
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+def augury(primeform, pitch_class_collection):
+	pitch_class = []
+	result = []
+	#print "primeform is", primeform
+	#print "pitch_class_collection is", pitch_class_collection
+	
+	primeform_list = pitches_to_signature(primeform)
+	#print "primeform list is", primeform_list
+	
+	primeform_inversion_list = first_inversion(primeform_list)
+	#print "primeform inversion list is", primeform_inversion_list
+	
+	primeform_inversion = signature_to_pitches(primeform_inversion_list)
+	#print "primeform inversion is", primeform_inversion
+	
+	#print "chord test"
+	#search our pitch_class_collection for presence of primeform
+	for index, number in enumerate(pitch_class_collection): 
+		#index is the index, number is the value 0 or 1 at each index
+		if number == 1:
+			pitch_class.append(index)
+	#print "pitch class collection we're searching is", pitch_class
+	#we need to compare pitch_class and primeform
+	for x in range(0, 11):
+		#print "Round x =", x
+		if set(primeform).issubset(pitch_class):
+			#print "found a match at transposition", x
+			#print "the signature that we need to return is", transpose(primeform_list, x)
+			result.append(transpose(primeform_list, x))
+		primeform = [(y+1)%12 for y in primeform]
+		#print "for index", x,"primeform is", primeform, "and pitch class collection is", pitch_class
+		
+	#print "inversion test"
+	#print "pitch class collection we're searching is", pitch_class
+	#we need to compare pitch_class and primeform
+	for x in range(0, 11):
+		#print "Round x =", x
+		if set(primeform_inversion).issubset(pitch_class):
+			#print "found a match at transposition", x
+			#print "the signature that we need to return is", transpose(primeform_inversion_list, x)
+			result.append(transpose(primeform_inversion_list, x))
+		primeform_inversion = [(y+1)%12 for y in primeform_inversion]
+		#print "for index", x,"primeform is", primeform, "and pitch class collection is", pitch_class
+	return result
+	
+
+
+
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# dark_augury(primeform, signature)
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# A search function whereby you can match or 
+# partially-match any of the vectors we have 
+# generated in this code, using Galois field math.
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+def dark_augury(primeform, pitch_class_collection):
+	#we have a list of pitches in normal form
+	#convert it to a list so we can get the
+	#finite field element. 
+	print "primeform is", primeform
+	print "pitch_class_collection is", pitch_class_collection
+	primeform_list = pitches_to_signature(primeform)
+	print "primeform list is", primeform_list
+	d = F.ConvertListToElement(primeform_list)
+	print "the finite field element for primeform list is", d
+	#pitch_class_collection is already a list.
+	#just convert it to a finite field element.
+	e = F.ConvertListToElement(pitch_class_collection)
+	print "the finite field element for pitch_class_collection is", e
+	f = F.Divide(e,d)
+	print "pitch class collection divided by primeform list is", f
+	g = F.ShowCoefficients(f)
+	print "this result's coefficients are", g
+	primeform_inversion_list = first_inversion(primeform_list)
+	print "primeform inversion list is", primeform_inversion_list
+	h = F.ConvertListToElement(primeform_inversion_list)
+	print "the finite field element for primeform inversion list is", h
+	i = F.Divide(e,h)
+	print "pitch class collection divided by primeform inversion list is", i
+	j = F.ShowCoefficients(i)
+	print "this result's coeffcients are", j
+
+
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # You can find the duplicates analytically, too. 
 # Since we also have (trivially, now) the 
 # transposition level of each pc vector along 
 # with its normal form, and the interval vector 
 # for each, you can inspect the interval vector 
 # for the number of duplications between any two transpositions.
-# Pitch-classes in common between any two pc vectors.
-# Remember that the value in the interval vector is the number of occurrences of that interval in the normal form.
-# That value also tells you how many elements will be in common between two instances of the chord at those transpositions.
+#
+# Remember that the value in the interval vector 
+# is the number of occurrences of that interval 
+# in the normal form.
+# That value also tells you how many elements 
+# will be in common between two instances of 
+# the chord at those transpositions.
 # And in the case of generative algorithms 
 # (that is, compositional ones), then many 
 # of these give the branches out from the 
@@ -475,17 +579,6 @@ def common_tone(u, v):
 
 
 
-
-
-
-
-
-
-
-# pc inversion of a vector
-# Oh, and transposition, where transpose(x, t) takes vector x and music-transposes it by t, mod 12.
-# function invert(x) takes each x_i and sends it to x_{12-i%12}.
-
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # transpose(u, t)
 # take a signature and music-transposes 
@@ -501,21 +594,6 @@ def transpose(u, t):
 		if number == 1:
 			signature_u[(index + t)%12] = 1;
 	return signature_u
-	
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-# invert(u)
-# takes each x_i and sends it to x_{12-i%12}.
-#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-def invert(u):
-	signature_u = [0,0,0,0,0,0,0,0,0,0,0,0]
-	for index, number in enumerate(u): 
-		# index is the index of (u), number is the existence of
-		# value 0 or 1 at each index
-		#print "at index",index,"there is value",number
-		if number == 1:
-			signature_u[(12 - (index))%12] = 1;
-	return signature_u
-
 
 
 
@@ -575,6 +653,31 @@ def signature_complement(u):
 
 
 
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# first_inversion(u)
+# first inversion of a signature
+# takes a signature, returns the inversion
+# of that signature, left justified.
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+def first_inversion(u):
+	#print "attempting to invert the signature", u
+	inversion = [0,0,0,0,0,0,0,0,0,0,0,0]
+	for index, number in enumerate(u):
+		# index is the index of (u), number is the existence of
+		# value 0 or 1 at each index
+		#print "at index",index,"there is value",number
+		if number != 0:
+			inversion[11 - index] = 1
+	#print inversion
+	#print "and now I left justify this entire thing"
+	for index, number in enumerate(inversion):
+		if number != 0:
+			return list(pad(inversion[index::], 12, 0))
+		
+		
+		
+
+
 
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -606,61 +709,66 @@ F = ffield.FField(12) # create the field GF(2^12)
 #print "F.ShowPolynomial(F.Inverse(32)) is", F.ShowPolynomial(F.Inverse(32))
 #print "F.Multiply(32, 3041)", F.Multiply(32, 3041)
 #print "F.ShowCoefficients(3041)", F.ShowCoefficients(3041)
-print "F.ShowCoefficients(2222)", F.ShowCoefficients(2222)
+#print "F.ShowCoefficients(2222)", F.ShowCoefficients(2222)
+
+#print "F.ConvertListToElement([1,0,0,1,0,0,0,1,0,0,0,0])", F.ConvertListToElement([1,0,0,1,0,0,0,1,0,0,0,0])
+#print "testing augury(primeform, pitch_class_collection)", augury(primeform([1,0,0,1,0,0,0,1,0,0,0,0]), [1,0,1,0,1,1,0,1,0,1,0,1])
+
 
 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 # mess around zone 
 #-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 
-number_of_notes = 0
-j = 0
-number_of_chords = 0
-
-for i in range(0, (2**12)):
-	#print "F.ShowPolynomial(",i,")", F.ShowPolynomial(i)
-	#print "F.ShowCoefficients(",i,")", F.ShowCoefficients(i)
-	if F.ShowCoefficients(i).count(1) == 12:
-		print "F.ShowCoefficients(",i,")", F.ShowCoefficients(i)
-		print "number of notes in this signature is", F.ShowCoefficients(i).count(1)
-		number_of_chords = number_of_chords + 1
-	number_of_notes = 0
-	j = 0
-print "number of signature in this run is", number_of_chords
-print "all done."
-
-print "Just printing F.ShowCoefficients(2222) is", F.ShowCoefficients(2222)[1:13]
-
-print "left_justify_signature(2222) is", left_justify_signature(2222)
-print "weigh this signature 2222:\n", weigh(left_justify_signature(2222))
-print "rotate this signature and find minimum weight 2222:\n", minweight(left_justify_signature(2222))
+#number_of_notes = 0
+#j = 0
+#number_of_chords = 0
+#
+#for i in range(0, (2**12)):
+#	#print "F.ShowPolynomial(",i,")", F.ShowPolynomial(i)
+#	#print "F.ShowCoefficients(",i,")", F.ShowCoefficients(i)
+#	if F.ShowCoefficients(i).count(1) == 12:
+#		print "F.ShowCoefficients(",i,")", F.ShowCoefficients(i)
+#		print "number of notes in this signature is", F.ShowCoefficients(i).count(1)
+#		number_of_chords = number_of_chords + 1
+#	number_of_notes = 0
+#	j = 0
+#print "number of signature in this run is", number_of_chords
+#print "all done."
+#
+#print "Just printing F.ShowCoefficients(2222) is", F.ShowCoefficients(2222)[1:13]
+#
+#print "left_justify_signature(2222) is", left_justify_signature(2222)
+#print "weigh this signature 2222:\n", weigh(left_justify_signature(2222))
+#print "rotate this signature and find minimum weight 2222:\n", minweight(left_justify_signature(2222))
 #print "2222:", F.ShowCoefficients(2222)
-print "attempt to find prime form for 2222:\n", primeform(minweight(left_justify_signature(2222)))
-print "attempt to find interval vector for 2222\n", intvect(primeform(minweight(left_justify_signature(2222))))
-print "attempt to find inversional index vector for 2222\n", invindvect(primeform(minweight(left_justify_signature(2222))))
-print "attempt to find all signature that make the prime form for 2222\n",find_signatures(primeform(minweight(left_justify_signature(2222))))
-
-print "attempt to find all signature that make the prime form for 1\n",find_signatures(primeform(minweight(left_justify_signature(1))))
-
-print "attempt to find all signature that make the prime form for 4095\n",find_signatures(primeform(minweight(left_justify_signature(4095))))
-
-print "attempt to find all signature that make the prime form for off-on\n",find_signatures(primeform(minweight([0,1,0,1,0,1,0,1,0,1,0,1])))
-
-print "attempt to find transposition level for [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0]:", transposition_level([0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0])
-
-
-print "testing common_tone (number of pitch classes in common between two signatures)", common_tone(F.ShowCoefficients(1074)[1:13], F.ShowCoefficients(3333)[1:13])
-
-print "testing signature_to_pitches(3333). Signature for (3333) is", F.ShowCoefficients(3333)[1:13], "and the list of pitches for that is ", signature_to_pitches(F.ShowCoefficients(3333)[1:13])
-
-print "testing pitches_to_signature(3333). Pitches for (3333) is", signature_to_pitches(F.ShowCoefficients(3333)[1:13]), "and the list of pitches for that is ", pitches_to_signature(signature_to_pitches(F.ShowCoefficients(3333)[1:13]))
-
-
-print "testing def signature_complement([0,0,0,0,0,0,1,1,1,1,1,1])", signature_complement([0,0,0,0,0,0,1,1,1,1,1,1])
-
-print "testing transpose([0,0,0,0,0,0,1,1,1,1,1,1], 2)", transpose([0,0,0,0,0,0,1,1,1,1,1,1], 2)
-print "testing invert([0,0,0,0,0,0,1,1,1,1,1,1])", invert([0,0,0,0,0,0,1,1,1,1,1,1])
-
+#print "attempt to find prime form for 2222:\n", primeform(minweight(left_justify_signature(2222)))
+#print "attempt to find interval vector for 2222\n", intvect(primeform(minweight(left_justify_signature(2222))))
+#print "attempt to find inversional index vector for 2222\n", invindvect(primeform(minweight(left_justify_signature(2222))))
+#print "attempt to find all signature that make the prime form for 2222\n",find_signatures(primeform(minweight(left_justify_signature(2222))))
+#
+#print "attempt to find all signature that make the prime form for 1\n",find_signatures(primeform(minweight(left_justify_signature(1))))
+#
+#print "attempt to find all signature that make the prime form for 4095\n",find_signatures(primeform(minweight(left_justify_signature(4095))))
+#
+#print "attempt to find all signature that make the prime form for off-on\n",find_signatures(primeform(minweight([0,1,0,1,0,1,0,1,0,1,0,1])))
+#
+#print "attempt to find transposition level for [0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0]:", transposition_level([0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0])
+#
+#
+#print "testing common_tone (number of pitch classes in common between two signatures)", common_tone(F.ShowCoefficients(1074)[1:13], F.ShowCoefficients(3333)[1:13])
+#
+#print "testing signature_to_pitches(3333). Signature for (3333) is", F.ShowCoefficients(3333)[1:13], "and the list of pitches for that is ", signature_to_pitches(F.ShowCoefficients(3333)[1:13])
+#
+#print "testing pitches_to_signature(3333). Pitches for (3333) is", signature_to_pitches(F.ShowCoefficients(3333)[1:13]), "and the list of pitches for that is ", pitches_to_signature(signature_to_pitches(F.ShowCoefficients(3333)[1:13]))
+#
+#
+#print "testing def signature_complement([0,0,0,0,0,0,1,1,1,1,1,1])", signature_complement([0,0,0,0,0,0,1,1,1,1,1,1])
+#
+#print "testing transpose([0,0,0,0,0,0,1,1,1,1,1,1], 2)", transpose([0,0,0,0,0,0,1,1,1,1,1,1], 2)
+#print "testing invert([0,0,0,0,0,0,1,1,1,1,1,1])", invert([0,0,0,0,0,0,1,1,1,1,1,1])
+#
+#print "testing first_inversion([1,0,0,0,1,0,0,1,0,0,0,0])", first_inversion([1,0,0,0,1,0,0,1,0,0,0,0])
 
 
 
@@ -716,9 +824,6 @@ for i in range(1, (2**12)):
 	print >>transposition_level_lut_fp, F.ShowCoefficients(i)[1:13], transposition_level(F.ShowCoefficients(i)[1:13])
 
 
-#print lut_dict
-#can't use a list as a hash - but convert it into a binary number and then use that?
-	
 
 
 
