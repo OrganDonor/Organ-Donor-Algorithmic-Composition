@@ -251,13 +251,39 @@ class Signature:
 	def arpeggiate(self):
 		if self.data.count(1) == 0:
 			print "rest"
-		down = [0,0,0,0,0,0,0,0,0,0,0,0]
+			
 		#print "length of self is ", len(self.data)
 		for index, number in enumerate(self.data):
 			if number != 0:
-				print "index is", index, "and number is", number
-				down[index] = number
-#AI how to arpeggiate back down? 
+				print "going up, index is", index, "and number is", number
+				my_on_message = mido.Message('note_on', note=i, velocity=100)
+				print my_on_message
+				out.send(my_on_message)
+				time.sleep(0.2)
+				my_off_message = mido.Message('note_off', note=i, velocity=100)
+				print my_off_message
+				out.send(my_off_message)
+				time.sleep(0.05)
+		for index, number in reversed(list(enumerate(self.data))):
+			if number != 0:
+				print "going down, index is", index, "and number is", number
+				my_on_message = mido.Message('note_on', note=i, velocity=100)
+				print my_on_message
+				out.send(my_on_message)
+				time.sleep(0.2)
+				my_off_message = mido.Message('note_off', note=i, velocity=100)
+				print my_off_message
+				out.send(my_off_message)
+				time.sleep(0.05)
+				
+#middle c in MIDI is note 60.
+#we need to decide what means what in the signature.
+#in other words, calculate the MIDI note from the number and index in a signature
+
+
+#AI what is the best possible way to arpeggiate? set a time signature? Use a time signature? 
+#write a new method that plays one particular note out of a signature and call that instead of test tone code.
+  
 		
 		
 		
